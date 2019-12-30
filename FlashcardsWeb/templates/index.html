@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row justify-content-center welcome">
+            <div class="col-md-12">
+                <h1><a>Welcome to Flashcards.</a></h1>
+                <a>Here you can create your own flashcard decks for learning.</a>
+            </div>
+        </div>
+        <br>
+        {% if user.is_authenticated %}
+            <div class="row justify-content-center">
+                <a href="{% url 'deck_create' %}"><h3>Create new deck!</h3></a>
+            </div>
+        {% endif %}
+        <br>
+        <div class="row justify-content-center">
+            <h3>or</h3>
+        </div>
+        <br>
+        <div class="row justify-content-center">
+            <form class="form-inline" action="{% url 'decks_filtered' %}">
+                <input class="form-control mr-sm-2" type="search" name="title_contains" placeholder="Search by title or tags" aria-label="Search">
+                <button class="btn btn-unique btn-rounded btn-sm my-0" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

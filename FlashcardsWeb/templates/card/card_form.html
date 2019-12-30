@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="align-self-center">
+    <h2>Enter card information</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group col-md-12 mb-0">
+                    {{ form.parentDeck|as_crispy_field }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12 mb-0">
+                    {{ form.front|as_crispy_field }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12 mb-0">
+                    {{ form.back|as_crispy_field }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12 mb-0">
+                    {{ form.usageExample|as_crispy_field }}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">Save card</button>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                {% if user != deck.creator %}
+                    <th>Title</th>
+                    <th>Number of cards</th>
+                    <th>Author</th>
+                {% else %}
+                    <th>Title</th>
+                    <th>Number of cards</th>
+                    <th>Author</th>
+                    <th>Actions</th>
+                {% endif %}
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                {% if user != deck.creator %}
+                    <td>{{ deck.title }}</td>
+                    <td>{{ deck.num_of_cards }}</td>
+                    <td>{{ deck.creator }}</td>
+                {% elif user == deck.creator %}
+                    <td>{{ deck.title }}</td>
+                    <td>{{ deck.description }}</td>
+                    <td>{{ deck.creator }}</td>
+                    <td>
+                        <button class="btn btn-info"
+                                onclick="window.location.href='{% url 'deck_edit' deck.pk %}'">
+                            <a class="deck-detail-text">Edit</a>
+                        </button>
+                        {#                        <a href="{% url 'deck_delete' deck.pk %}">Delete</a> /#}
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal">
+                            Delete
+                        </button>
+                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+                             aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <form action="{% url 'deck_delete' pk=deck.pk %}" method="post">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {% csrf_token %}
+                                            <p>Are you sure you want to delete deck "{{ deck.title }}"?</p>
+                                            {#                                            <input type="submit" value="Confirm">#}
+
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                Close
+                                            </button>
+                                            <button type="submit" class="btn btn-danger" value="Confirm">
+                                                Delete (cannot be undone)
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary"
+                                onclick="window.location.href='{% url 'card_create' deck.pk %}'">
+                            <a class="deck-detail-text">Add cards</a>
+                        </button>
+                    </td>
+
+
+                {% else %}
+                {% endif %}
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    {% if not user.is_authenticated %}
+        <h2 class="sample">Sample:</h2>
+    {% endif %}
+    <div class="row justify-content-center">
+
+        {% if user.is_authenticated %}
+            {% if deck.card_set.count != 0 %}
+                {% if card.has_prev_card %}
+                    <div class="col-md-2 col-sm-2 col-xs-2 prev-button">
+                        <a href="{% url 'deck_detail' deck.pk %}?card={{ card.get_prev_card.id }}">Previous</a>
+                    </div>
+                {% else %}
+                    <div class="col-md-2 col-sm-2 col-xs-2 prev-button grayed"><a href="">Previous</a></div>
+                {% endif %}
+                <div class="col-md-8 col-sm-8 col-xs-8 card-container">
+                    <div class="card-wrapper">
+                        <div class="card__face card__face--front">
+                            <a>{{ card.front }}</a>
+                        </div>
+                        <div class="card__face card__face--back">
+                            <a class="back-text">{{ card.back }}</a>
+                            <p class="usage-example">{{ card.usageExample }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% if card.has_next_card %}
+                    <div class="col-md-2 col-sm-2 col-xs-2 next-button"><a
+                            href="{% url 'deck_detail' deck.pk %}?card={{ card.get_next_card.id }}">Next</a></div>
+                {% else %}
+                    <div class="col-md-2 col-sm-2 col-xs-2 prev-button grayed"><a href="">Next</a></div>
+                {% endif %}
+                <br>
+            {% elif deck.card_set.count == 0 %}
+                <div class="row justify-content-center"><h3>No cards available</h3></div>
+            {% endif %}
+        {% else %}
+            {% if deck.card_set.all.first %}
+                <div class="col-md-8 card-container">
+                    <div class="card-wrapper">
+                        <div class="card__face card__face--front">
+                            <a>{{ card.front }}</a>
+                        </div>
+                        <div class="card__face card__face--back">
+                            <a>{{ card.back }}</a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="row justify-content-center"><h3>No cards available</h3></div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <script type="text/javascript">
+        const cards = document.querySelectorAll('.card-wrapper');
+        cards.forEach(card => card.addEventListener('click', function () {
+            card.classList.toggle('is-flipped');
+        }));
+
+    </script>
+
+{% endblock %}
