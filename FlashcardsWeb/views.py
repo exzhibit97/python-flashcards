@@ -115,7 +115,7 @@ class DeckFilteredListView(ListView):
         # qs = self.model.objects.all()
         search_query = self.request.GET.get('title_contains')
         print(search_query)
-        return Deck.objects.all().filter(title__contains=search_query)
+        return Deck.objects.all().filter(title__contains=search_query, is_public=True)
 
 
 class DeckUpdateView(LoginRequiredMixin, UpdateView):
@@ -123,6 +123,12 @@ class DeckUpdateView(LoginRequiredMixin, UpdateView):
     form_class = DeckForm
     template_name = 'deck/deck_form.html'
     success_url = reverse_lazy('decks')
+
+    def form_valid(self, form):
+        deck = form.save(commit=False)
+        deck.creator = self.request.user
+        deck.save()
+        return super(DeckUpdateView, self).form_valid(form)
 
 
 class DeckDetailView(DetailView):

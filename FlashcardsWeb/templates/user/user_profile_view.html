@@ -1,65 +1,130 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="container">
-    <div class="row profile">
-		<div class="col-md-3">
-			<div class="profile-sidebar">
-				<!-- SIDEBAR USERPIC -->
-				<div class="profile-userpic">
-					<img src="https://static.change.org/profile-img/default-user-profile.svg" class="img-responsive" alt="">
-				</div>
-				<!-- END SIDEBAR USERPIC -->
-				<!-- SIDEBAR USER TITLE -->
-				<div class="profile-usertitle">
-					<div class="profile-usertitle-name">
-						Marcus Doe
-					</div>
-					<div class="profile-usertitle-job">
-						Developer
-					</div>
-				</div>
-				<!-- END SIDEBAR USER TITLE -->
-				<!-- SIDEBAR BUTTONS -->
-				<div class="profile-userbuttons">
-					<button type="button" class="btn btn-success btn-sm">Follow</button>
-					<button type="button" class="btn btn-danger btn-sm">Message</button>
-				</div>
-				<!-- END SIDEBAR BUTTONS -->
-				<!-- SIDEBAR MENU -->
-				<div class="profile-usermenu">
-					<ul class="nav">
-						<li class="active">
-							<a href="#">
-							<i class="glyphicon glyphicon-home"></i>
-							Overview </a>
-						</li>
-						<li>
-							<a href="#">
-							<i class="glyphicon glyphicon-user"></i>
-							Account Settings </a>
-						</li>
-						<li>
-							<a href="#" target="_blank">
-							<i class="glyphicon glyphicon-ok"></i>
-							Tasks </a>
-						</li>
-						<li>
-							<a href="#">
-							<i class="glyphicon glyphicon-flag"></i>
-							Help </a>
-						</li>
-					</ul>
-				</div>
-				<!-- END MENU -->
-			</div>
-		</div>
-		<div class="col-md-9">
-            <div class="profile-content">
-			   Some user related content goes here...
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="user-image-placeholder">
+                <div class="col-sm-2">
+                    <img class="img-circle img-responsive" src="../../static/avatar_2x.png">
+                </div>
             </div>
-		</div>
-	</div>
-</div>
+        </div>
+        <div class="row text-center justify-content-center">
+            <div class="col-md-6 col-sm-6">
+                <p><h3>{{ user.username }}</h3></p>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="row justify-content-center">
+                    <p><b>Decks owned:</b></p>
+                </div>
+                <div class="row justify-content-center">
+                    <p><b>{{ user.deck_set.count }}</b></p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row justify-content-center">
+                    <p><h4>Email:</h4></p>
+                </div>
+                <div class="row justify-content-center">
+                    <p><b>{{ user.email }}</b></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    {% for deck in decks %}
+        <table class="table table-bordered profile-table">
+            <thead>
+            <tr>
+                <th style="width:40%">Deck</th>
+                <th>Cards</th>
+                <th style="width:5%">Details</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><a href="{% url 'deck_detail' deck.pk %}">{{ deck.title }}</a></td>
+                <td>{{ deck.num_of_cards }}</td>
+                <td align="center">
+                    <button class="btn btn-secondary" type="button" data-toggle="collapse"
+                            data-target="#collapseExample{{ deck.id }}"
+                            aria-expanded="false" aria-controls="collapseExample">
+                        &darr;
+                    </button>
+                </td>
+            </tr>
+
+        </table>
+        <table>
+            {% for card in deck.card_set.all %}
+
+                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+                     aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <form action="{% url 'card_delete' deck.id card.pk %}" method="post">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    {% csrf_token %}
+                                    <p>Are you sure you want to delete this card "{{ card.front }}"?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                        Close
+                                    </button>
+                                    <button type="submit" class="btn btn-danger" value="Confirm">
+                                        Delete (cannot be undone)
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapse col-md-6 col-sm-6 col-xs-12 card-container" id="collapseExample{{ deck.id }}">
+                    <div class="card-buttons">
+                        <button class="btn btn-link"
+                                onclick="window.location.href='{% url 'card_edit' deck.id card.id %}'">
+                            <i class="far fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#exampleModal">
+                            <i class="far fa-trash-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-wrapper">
+                        <div class="card__face card__face--front">
+                            <a>{{ card.front }}</a>
+                        </div>
+                        <div class="card__face card__face--back">
+                            <a class="back-text">{{ card.back }}</a>
+                            <p class="usage-example">{{ card.usageExample }}</p>
+                        </div>
+                    </div>
+                </div>
+
+
+            {% endfor %}
+        </table>
+
+    {% endfor %}
+
+    <script type="text/javascript">
+        const cards = document.querySelectorAll('.card-wrapper');
+        cards.forEach(card => card.addEventListener('click', function () {
+            card.classList.toggle('is-flipped');
+        }));
+
+    </script>
 
 {% endblock %}
