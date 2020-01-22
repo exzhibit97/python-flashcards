@@ -1,17 +1,11 @@
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from django.core.paginator import Paginator
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from django.utils.decorators import method_decorator
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
-from django.urls import reverse_lazy, reverse
 
-from .filters import DeckFilter
-from .models import Deck, Card
 from .forms import DeckForm, CardForm, SignUpForm
+from .models import Deck, Card
 
 
 def index(request):
@@ -77,7 +71,7 @@ class CardDeleteView(LoginRequiredMixin, DeleteView):
         return '/accounts/profile/' + user_id
 
 
-class DeckCreateView(CreateView):
+class DeckCreateView(LoginRequiredMixin, CreateView):
     model = Deck
     form_class = DeckForm
     template_name = 'deck/deck_form.html'
@@ -100,6 +94,7 @@ class DeckListView(ListView):
     model = Deck
     template_name = 'deck/deck_list.html'
     context_object_name = 'decks'
+    success_url = reverse_lazy('decks')
 
     def get_queryset(self):
         return Deck.objects.all().filter(is_public=True)
@@ -134,6 +129,12 @@ class DeckUpdateView(LoginRequiredMixin, UpdateView):
 class DeckDetailView(DetailView):
     model = Deck
     template_name = 'deck/deck_detail.html'
+
+    def dispatch(self, *args, **kwargs):
+        deck = get_object_or_404(Deck, id=self.kwargs.get('pk'))
+        if deck.creator != self.request.user and deck.is_public != True:
+            return redirect('decks')
+        return super(DeckDetailView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         deck = get_object_or_404(Deck, id=self.kwargs.get('pk'))
